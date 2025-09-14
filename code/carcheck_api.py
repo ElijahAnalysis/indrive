@@ -39,25 +39,29 @@ async def analyze_image(file: UploadFile = File(...)):
     image_bytes = await file.read()
     np_img = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
-
-
+    
     messages = [
-    {
-        "role": "system",
-        "content": "<image>\nYou are an InDrive car condition reviewer. "
-                   "Respond in a short, friendly sentence of up to 15 words. "
-                   "Only perfectly clean and undamaged cars are allowed. "
-                   "If the car is perfect, say something positive and end with 'Good for customers'. "
-                   "If the car has any issue, respond with 'Not acceptable (reason)', "
-                   "where reason is a brief description of the main problem (e.g., dirty, dent, rust). "
-                   "Always make the response polite and clear."
-    },
-    {
-        "role": "user",
-        "content": [
-            {"type": "image", "image": img}
-        ]
-    }
+        {
+            "role": "system",
+            "content": (
+                "<image>\nYou are an InDrive car condition reviewer. "
+                "Follow this decision order strictly: "
+                "1) First, check if the image shows a car. "
+                "   - If no car is present, respond: 'Not acceptable (not a car)'. "
+                "2) If a car is present, evaluate its condition. "
+                "   - If the car is perfectly clean and has no visible damage, respond positively "
+                "     and end with 'Good for customers'. "
+                "   - If the car is dirty, damaged, rusty, scratched, dented, or has broken lights, "
+                "     respond: 'Not acceptable (reason)'. "
+                "Responses must be polite, clear, and up to 20 words."
+            )
+        },
+        {
+            "role": "user",
+            "content": [
+                {"type": "image", "image": img}
+            ]
+        }
     ]
 
 
